@@ -18,8 +18,8 @@ app.use(cors());
 
 const port = 5000;
 
-app.get('/', (req, res) =>{
-    res.send("hello I am working")
+app.get('/', (req, res) => {
+  res.send("hello I am working")
 })
 
 
@@ -31,87 +31,123 @@ client.connect(err => {
   const adminsCollection = client.db("massDesign").collection("admins");
   console.log('database connected successfully');
 
-//  code for loading data from database
-  app.get('/services', (req, res) =>{
-      servicesCollection.find()
-      .toArray((err,items) =>{
-          res.send(items);
+  //  code for loading data from database
+  app.get('/services', (req, res) => {
+    servicesCollection.find({})
+      .toArray((err, items) => {
+        res.send(items);
         //   console.log('from database', items);
       })
   })
 
-// service add code by admin
-  app.post('/addService', (req, res) =>{
-      const newService = req.body;
-      console.log('adding new service', newService);
-      servicesCollection.insertOne(newService)
+  // service add code by admin
+  app.post('/addService', (req, res) => {
+    const newService = req.body;
+    console.log('adding new service', newService);
+    servicesCollection.insertOne(newService)
       .then(result => {
-          console.log('inserted count', result.insertedCount);
-          res.send(result.insertedCount > 0);
-          
-      })     
-  })
+        console.log('inserted count', result.insertedCount);
+        res.send(result.insertedCount > 0);
 
-// service del code by admin
-  app.delete('/delete/:id', (req,res) => {
-      const id = req.params.id;
-      servicesCollection.deleteOne({_id: ObjectID(req.params.id)})
-      .then( (result) => {
-          console.log(result)
       })
   })
 
-// review add code by customer
-  app.post('/addReview', (req,res) =>{
-      const newReview = req.body;
-      console.log('adding new review:', newReview);
-      reviewsCollection.insertOne(newReview)
+  // service del code by admin
+  app.delete('/delete/:id', (req, res) => {
+    const id = req.params.id;
+    servicesCollection.deleteOne({ _id: ObjectID(req.params.id) })
+      .then((result) => {
+        console.log(result)
+      })
+  })
+
+  // review add code by customer
+  app.post('/addReview', (req, res) => {
+    const newReview = req.body;
+    console.log('adding new review:', newReview);
+    reviewsCollection.insertOne(newReview)
       .then(result => {
-          console.log('inserted count',result.insertedCount);
-          res.send(result.insertedCount > 0)
+        console.log('inserted count', result.insertedCount);
+        res.send(result.insertedCount > 0)
       })
   })
 
   //  code for loading review data from database
-  app.get('/reviews', (req, res) =>{
-    reviewsCollection.find()
-    .toArray((err,items) =>{
+  app.get('/reviews', (req, res) => {
+    reviewsCollection.find({})
+      .toArray((err, items) => {
         res.send(items);
+      })
+  })
+
+  // order add code by customer
+  app.post('/addOrder', (req, res) => {
+    const newOrder = req.body;
+    console.log('adding new order:', newOrder);
+    ordersCollection.insertOne(newOrder)
+      .then(result => {
+        console.log('inserted count', result.insertedCount);
+        res.send(result.insertedCount > 0)
+      })
+  })
+
+  // app.post('/orderBySpecificEmail', (req, res) => {
+  //   const email = req.body.email;
+  //   adminsCollection.find({ email: email })
+  //     .toArray((err, documents) => {
+  //       const filter = { email: email }
+  //       if(documents.length === 0){
+  //          filter.email =email;
+  //       }
+  //         ordersCollection.find(filter)
+  //           .toArray((err, items) => {
+  //             console.log(items);
+  //             res.send(items)
+  //           })
+  //       res.send(documents)
+  //     })
+  // })
+
+// code for showing email specific booklist to customer
+  app.post('/orderBySpecificEmail', (req,res) =>{
+    const email = req.body.email;
+    ordersCollection.find({email: email})
+    .toArray( (err, documents) =>{
+      console.log(documents);
+      res.send(documents)
     })
-})
-
-// order add code by customer
-app.post('/addOrder', (req,res) =>{
-  const newOrder = req.body;
-  console.log('adding new review:', newOrder);
-  ordersCollection.insertOne(newOrder)
-  .then(result => {
-      console.log('inserted count',result.insertedCount);
-      res.send(result.insertedCount > 0)
   })
-})
 
-//  code for loading order data from database
-
-app.get('/orders', (req, res) =>{
-  console.log(req.query.email);
-  ordersCollection.find({email: req.query.email})
-  .toArray((err,items) =>{
-      res.send(items);
+  // code for admin full access
+  app.post('/isAdmin', (req,res) => {
+    const email = req.body.email;
+    adminsCollection.find({email: email})
+    .toArray((err,documents)=>{
+      res.send(documents.length>0);
+    })
   })
-})
 
-// admin add code by admin
-app.post('/addAdmin', (req, res) =>{
-  const newAdmin = req.body;
-  console.log('adding new Admin', newAdmin);
-  adminsCollection.insertOne(newAdmin)
-  .then(result => {
-      console.log('inserted count', result.insertedCount);
-      res.send(result.insertedCount > 0);
-      
-  })     
-})
+  //  code for loading order data from database
+
+  app.get('/orders', (req, res) => {
+    // console.log(req.body);
+    ordersCollection.find({})
+      .toArray((err, documents) => {
+        res.send(documents);
+      })
+  })
+
+  // admin add code by admin
+  app.post('/addAdmin', (req, res) => {
+    const newAdmin = req.body;
+    console.log('adding new Admin', newAdmin);
+    adminsCollection.insertOne(newAdmin)
+      .then(result => {
+        console.log('inserted count', result.insertedCount);
+        res.send(result.insertedCount > 0);
+
+      })
+  })
 
 });
 
